@@ -2,6 +2,7 @@ import requests
 import json
 import pytest
 import allure
+from urls import OrderUrls
 
 
 class TestCreateOrder:
@@ -11,5 +12,5 @@ class TestCreateOrder:
     def test_order_is_created(self, order_data, color):
         order_data += color
         order_data = json.dumps(order_data)
-        response = requests.post("https://qa-scooter.praktikum-services.ru/api/v1/orders", data=order_data)
+        response = requests.post(OrderUrls.order, data=order_data)
         assert response.status_code == 201 and "track" in response.json()
