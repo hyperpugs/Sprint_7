@@ -15,7 +15,6 @@ class TestCourierLogin:
         assert response.status_code == 200 and "id" in response.json()
 
     @allure.title("Проверяем, что при передаче только логина приходит ошибка")
-    @pytest.mark.xfail(reason="Баг API: падает с 504 ошибкой")
     def test_login_without_password_returns_error(self, payload):
         response = requests.post(CourierLoginUrls.create, data=payload)
         assert response.status_code == 201 and response.text == '{"ok":true}'
