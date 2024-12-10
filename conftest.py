@@ -1,42 +1,29 @@
 import pytest
-import random
-import string
-import json
+import requests
+import generators
+from data import Url
+
 
 @pytest.fixture
-def payload():
-    def generate_random_string(length):
-        letters = string.ascii_lowercase
-        random_string = ''.join(random.choice(letters) for i in range(length))
-        return random_string
+def create_courier():
+    login = generators.login_generator()
+    password = generators.password_generator()
+    name = generators.name_generator()
+    create_courier_body = {'login': login, 'password': password, 'first_name': name}
+    login_courier_body = {'login': login, 'password': password}
+    requests.post(f'{Url.MAIN_URL}{Url.CREATE_COURIER}', json=create_courier_body)
+    login_courier = requests.post(f'{Url.MAIN_URL}{Url.COURIER_LOGIN}', json=login_courier_body)
+    yield [create_courier_body, login_courier_body, login, password]
+    requests.delete(f'{Url.MAIN_URL}{Url.COURIER_DELETE}{login_courier.json()['id']}')
 
-    # генерируем логин, пароль и имя курьера
-    login = generate_random_string(10)
-    password = generate_random_string(10)
-    first_name = generate_random_string(10)
-
-    # собираем тело запроса
-    payload = {
-        "login": login,
-        "password": password,
-        "firstName": first_name
-    }
-
-    return payload
 
 @pytest.fixture
-def order_data():
-    order_data = {
-        "firstName": "Naruto",
-        "lastName": "Uchiha",
-        "address": "Konoha, 142 apt.",
-        "metroStation": 4,
-        "phone": "+7 800 355 35 35",
-        "rentTime": 5,
-        "deliveryDate": "2025-06-06",
-        "comment": "Saske, come back to Konoha"
-    }
-    order_data = json.dumps(order_data)
-    return order_data
-
-
+def generate_courier_data():
+    login = generators.login_generator()
+    password = generators.password_generator()
+    name = generators.name_generator()
+    creation_courier_body = {'login': login, 'password': password, 'first_name': name}
+    login_courier_body = {'login': login, 'password': password}
+    yield [creation_courier_body, login_courier_body]
+    login_courier = requests.post(f'{Url.MAIN_URL}{Url.COURIER_LOGIN}', json=login_courier_body)
+    requests.delete(f'{Url.MAIN_URL}{Url.COURIER_DELETE}{login_courier.json()['id']}')
